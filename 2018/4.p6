@@ -1149,7 +1149,7 @@ for @guardlogs -> $log {
 # 1
 {
     my %sleep;
-    
+
     for @orderbydays -> $day {
         %sleep{$day.id} += $day.count();
     }
@@ -1169,6 +1169,30 @@ for @guardlogs -> $log {
     }
 
     say @minute.maxpairs.[0].key * $id;
+}
+
+# 2
+{
+    my %sleep;
+
+    for @orderbydays -> $day {
+        if %sleep{$day.id}:!exists {
+            for ^60 {
+                %sleep{$day.id}[$_] = 0;
+            }
+        }
+        for ^60 {
+            if $day.minute.[$_] == 1 {
+                %sleep{$day.id}[$_] += 1;
+            }
+        }
+    }
+
+    for %sleep.keys -> $key {
+        %sleep{$key} = %sleep{$key}.maxpairs.[0];
+    }
+
+    say do given %sleep.sort(*.value.value).[* - 1] { .key * .value.key };
 }
 
 class GuardLog {
@@ -1208,7 +1232,7 @@ class GuardLog {
                 event  => GEvent::WAKEUP,
             };
         } else {
-            %{};   
+            %{};
         }
     }
 
