@@ -1,0 +1,8 @@
+# AdventOfCode
+The advent of code solution in Perl 6
+
+## Years
+
+* 2018
++
+link:2018/[2018]
