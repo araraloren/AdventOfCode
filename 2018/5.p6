@@ -24,36 +24,30 @@ STR
 
 # 1 .2
 {
-    my ($elem, $flag, $curr, $next) = (0, 1, 0, 1);
-    my @str = $str.comb;
+    my @str = "dabAcCaCBAcCcaDA".comb;
+    my @stack = @str[0];
+    my ($ch, $index) = (@str[1], 2);
 
-    while $next < +@str {
-        if (@str[$curr].ord - @str[$next].ord).abs == 32 {
-            if $curr == 0 {
-                $curr = $next + 1;
-                $next = $curr + 1;
-                next;
-            } else {
-                $curr -= 1;
-                $next += 1;
-            }
-            while True {
-                if $curr == 0 {
-                    $curr = $next + 1;
-                    $next = $curr + 1;
-                    last;
-                } else {
-                    $curr -= 1;
-                    $next += 1;
-                    if (@str[$curr].ord - @str[$next].ord).abs != 32 {
-                        @str[$elem++] = @str[$curr];
-                        $curr = $next + 1;
-                        $next = $curr + 1;
-                        last;
-                    }
-                }
-            }
+    while $index <= +@str {
+        if +@stack == 0 {
+            say "ADD {@str[$index]} to stack";
+            @stack.push(@str[$index++]);
         }
-        @str[$elem++] = @str[$curr++];
+        my $topch = @stack[* - 1];
+
+        say "COMPARE $ch and $topch";
+        if ($topch.ord - $ch.ord ).abs == 32 {
+            @stack.pop();
+            say "POP stack";
+        } else {
+            @stack.push($ch);
+            say "PUSH $ch to stack";
+        }
+        last if $index == +@str;
+        say "CURRENT stack => ", @stack;
+        say "REPLACE ch to {@str[$index]} ";
+        $ch = @str[$index++];
     }
+
+    say @stack;    
 }
