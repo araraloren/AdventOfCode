@@ -77,7 +77,7 @@ for ^($rx - $lx) -> $x {
         for @point {
             @distance.push( (.x - $lx - $x).abs + (.y - $ly - $y).abs );
         }
-        given @distance.minpairs {
+        given @distance.minpairs { # 1
             if .elems == 1 {
                 my $i = .[0].key;
 
@@ -91,7 +91,7 @@ for ^($rx - $lx) -> $x {
             }
         }
 
-        if @distance.sum < 10000 {
+        if @distance.sum < 10000 { # 2
             $region += 1;
         }
     }
