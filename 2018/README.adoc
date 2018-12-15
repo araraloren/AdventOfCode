@@ -1,30 +1,6 @@
 
-== Index
+== The solutions
 
-* 1
-+
-link:1.p6#L1002[1.p6]
+link:1.p6#L1002[1.p6]   link:2.p6#L254[2.p6]    link:3.p6#L1305[3.p6]    link:4.p6#L1116[4.p6]    link:5.p6#5[5.p6]
 
-* 2
-+
-link:2.p6#L254[2.p6]
-
-* 3
-+
-link:3.p6#L1305[3.p6]
-
-* 4
-+
-link:4.p6#L1116[4.p6]
-
-* 5
-+
-link:5.p6#5[5.p6]
-
-* 6
-+
-link:6.p6#54[6.p6]
-
-* 7
-+
-link:7.p6#105[7.p6]
+link:6.p6#54[6.p6]    link:7.p6#105[7.p6]
