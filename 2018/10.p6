@@ -404,12 +404,14 @@ for $str.chomp.lines -> $line {
 my $second = 0;
 my ($prevarea, $currarea) = (getArea(@point).area(), 0);
 
+say "WITH {+@point} POINTS"; # It cost about 30 seconds
+
 repeat {
     elapse(@point);
     $second += 1;
     $currarea = getArea(@point).area();
     if $prevarea < $currarea {
-        elapse(@point, -1);
+        elapseBack(@point, 1);
         $second -= 1;
         say " --> wait {$second} second!";
         printMessage(getArea(@point), @point); # 1
@@ -420,7 +422,6 @@ repeat {
 
 sub printMessage(Rect $rect, @point) {
     my @image;
-
     for $rect.miny .. $rect.maxy {
         my @t;
         @t.push('.') for $rect.minx .. $rect.maxx;
@@ -436,28 +437,24 @@ sub elapse(@point, Int $second = 1) {
     .elapse($second) for @point;
 }
 
+sub elapseBack(@point, Int $second = 1) {
+    .elapseBack($second) for @point;
+}
+
 sub getArea(@point) {
-    my $maxx = @point.max(*.x).x;
-    my $minx = @point.min(*.x).x;
-    my $maxy = @point.max(*.y).y;
-    my $miny = @point.min(*.y).y;
+    my int $maxx = @point.max(*.x).x;
+    my int $minx = @point.min(*.x).x;
+    my int $maxy = @point.max(*.y).y;
+    my int $miny = @point.min(*.y).y;
 
     return Rect.new(:$maxx, :$minx, :$maxy, :$miny);
 }
 
-sub convertToCoord(@point, $maxx, $maxy) {
-    my @realpoint = [];
-    for @point {
-        @realpoint.push(.convert($maxx, $maxy));
-    }
-    @realpoint;
-}
-
 class Rect {
-    has $.maxx;
-    has $.minx;
-    has $.maxy;
-    has $.miny;
+    has int $.maxx;
+    has int $.minx;
+    has int $.maxy;
+    has int $.miny;
 
     method area() {
         ( $!maxx - $!minx ) * ( $!maxy - $!miny );
@@ -465,30 +462,23 @@ class Rect {
 }
 
 class Point {
-    has $.x;
-    has $.y;
-    has $.vx;
-    has $.vy;
+    has int $.x;
+    has int $.y;
+    has int $.vx;
+    has int $.vy;
 
-    method convert($maxx, $maxy) {
-        $!x = $maxx - $!x.abs if $!x < 0;
-        $!y = $maxy - $!y.abs if $!y < 0;
-        self;
+    method elapseBack(Int $second = 1) {
+        for ^$second.abs() {
+            $!x -= $!vx;
+            $!y -= $!vy;
+        }
     }
 
     method elapse(Int $second = 1) {
-        if $second > 0 {
-            for ^$second {
-                $!x += $!vx;
-                $!y += $!vy;
-            }
-        } elsif $second < 0 {
-            for ^$second.abs() {
-                $!x -= $!vx;
-                $!y -= $!vy;
-            }
+        for ^$second {
+            $!x += $!vx;
+            $!y += $!vy;
         }
-        self;
     }
 
     method coord() {
