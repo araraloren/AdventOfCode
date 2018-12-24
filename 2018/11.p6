@@ -1,6 +1,6 @@
 #!/usr/bin/env perl6
 
-my $grid-serial-number = 18;
+my $grid-serial-number = 3463;
 
 my ($maxx, $maxy);
 my $max = 0;
@@ -17,7 +17,7 @@ for 1 .. 298 -> $z {
         }
     }
 
-    say "\t\tMAX POWER LEVEL OF {$z} SQUARE => ({$maxx}, {$maxy})";
+    say "\t\tMAX POWER LEVEL OF {$z} SQUARE => ({$maxx}, {$maxy}) -> $max";
 }
 
 say " MAX POWER LEVEL OF SQUARE => ({$maxx}, {$maxy})";
@@ -25,14 +25,16 @@ say " MAX POWER LEVEL OF SQUARE => ({$maxx}, {$maxy})";
 my @cell;
 
 sub get-total-power-level($x, $y, $z, $gsn) {
-    if $z == 1 {
-        if ! @cell[$x][$y][$z].defined {
+    if ! @cell[$x][$y][$z].defined {
+        if $z == 1 {
             my $rack-id = $x + 10;
             my $digit = (($rack-id * $y) + $gsn) * $rack-id;
             @cell[$x][$y][$z] = $digit < 100 ?? 0 !! ( $digit div 100 % 10 - 5 );
-        }
-    } else {
-        if ! @cell[$x][$y][$z].defined {
+        } elsif $z == 2 {
+            @cell[$x][$y][$z] = &get-total-power-level($x + 1, $y + 1, 1, $gsn) +
+                &get-total-power-level($x, $y + 1, 1, $gsn) +
+                &get-total-power-level($x + 1, $y, 1, $gsn);
+        } else {
             my $res = 0;
             $res += &get-total-power-level($x, $y, $z - 1, $gsn);
             for ^$z -> $iz {
