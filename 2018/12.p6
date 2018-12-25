@@ -1,20 +1,38 @@
 my $str = Q:to/STR/;
-initial state: #..#.#..##......###...###
+initial state: #.##.#.##..#.#...##...#......##..#..###..##..#.#.....##..###...#.#..#...######...#####..##....#..###
 
-...## => #
-..#.. => #
-.#... => #
-.#.#. => #
+##.## => .
+##... => #
+..#.# => #
+#.... => .
+#..#. => #
+.#### => .
+.#..# => .
+.##.# => .
+#.##. => #
+####. => .
+..##. => .
+##..# => .
 .#.## => #
+.#... => .
 .##.. => #
-.#### => #
-#.#.# => #
-#.### => #
+..#.. => #
+#..## => #
+#.#.. => #
+..### => #
+...#. => #
+###.. => .
 ##.#. => #
-##.## => #
-###.. => #
+#.#.# => #
+##### => #
+....# => .
+#.### => .
+.#.#. => #
+.###. => #
+...## => .
+..... => .
 ###.# => #
-####. => #
+#...# => .
 STR
 
 subset RChar of Str where * eq '#' | '.';
@@ -57,13 +75,50 @@ class RTree {
     }
 }
 
-my $zero = 0;
-my @pot;
+class PotQueue {
+    has @.pot handles < AT-POS append prepend push pop elems ASSIGN-POS >;
+    has $.zero = 0;
+
+    method setpot(@pot) {
+        @!pot = @pot;
+    }
+
+    method extend() {
+        if @!pot.head(5).grep('#') {
+            @!pot.prepend(< . . . >);
+            $!zero += 5;
+        }
+        @!pot.append(< . . . >) if @!pot.tail(5).grep('#');
+        self;
+    }
+
+    method reduce() {
+        if @pop.
+    }
+
+    method Int() {
+        @!pot.elems;
+    }
+
+    method gist() {
+        ("." xx ($!zero + 1 )) ~ "\n" ~ @!pot;
+    }
+
+    method sum() {
+        my $sum = 0;
+        for 0 ..^ +@!pot -> $i {
+            $sum += $i - $!zero if @!pot[$i] eq '#';
+        }
+        $sum;
+    }
+}
+
+my PotQueue $pq .= new;
 my RTree $rtree .= new;
 
 for $str.lines {
     if /^ 'initial state:' \s+ (<[\#\.]>+)/ {
-        @pot = $0.Str.comb;
+        $pq.setpot($0.Str.comb);
     } elsif / (<[\#\.]>+) \s+ '=>' \s+ (<[\#\.]>)  / {
         my $tree = $rtree;
         for $0.Str.comb -> $ch {
@@ -74,35 +129,27 @@ for $str.lines {
     }
 }
 
-@pot = extendPot(@pot);
+for ^50000000000 {
+    my @next = '.' xx $pq.extend.elems;
 
-my @next = @pot;
-
-for ^(+@pot - 5) {
-    my @sub = @pot[$_ .. $_ + 4];
-    my ($found, $tree) = (True, $rtree);
-    for @sub -> $ch {
-        if $tree.hasChild($ch) {
-            $tree = $tree.getChild($ch);
-        } else {
-            $found = False;
-            last;
+    for ^($pq.elems - 4) {
+        my @sub = $pq[$_ .. $_ + 4];
+        my ($found, $tree) = (True, $rtree);
+        for @sub -> $ch {
+            if $tree.hasChild($ch) {
+                $tree = $tree.getChild($ch);
+            } else {
+                $found = False;
+                last;
+            }
+        }
+        if $found {
+            @next[$_ + 2] = $tree.result;
         }
     }
-    if $found {
-        @next[$_] = @next[$_ + 1] = @next[$_ + 3] = @next[$_ + 4] = '.';
-        @next[$_ + 2] = $tree.result;
-    }
-    say @next;
+    $pq.setpot(@next);
+    say $_ if $_ % 1000000 == 0;
 }
 
-sub extendPot(@pot) {
-    if @pot.head(3).grep('#') {
-        @pot.prepend(< . . . >);
-        $zero += 3;
-    }
-    if @pot.tail(3).grep('#') {
-        @pot.append(< . . . >);
-    }
-    @pot;
-}
+say $pq;
+say " --> sum = ", $pq.sum();
